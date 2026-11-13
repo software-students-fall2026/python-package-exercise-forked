@@ -40,6 +40,8 @@ dice_art = {
 class Craps:
     def __init__(self, wallet=None):
         self.wallet = wallet or Wallet()
+        self.wins = 0
+        self.losses = 0
 
     def print_dice(self, dice1, dice2):
         # these are all for the animation
@@ -49,7 +51,7 @@ class Craps:
             for line in range(5):
                 print(dice_art[d1][line] + "  " + dice_art[d2][line])
             sys.stdout.write("\033[5A")         # moves the cursor back up 5 lines each time so the dice animate in place
-            time.sleep(0.1 + i * 0.025)
+            time.sleep(0.1 + i * 0.01)
 
         #prints the actual result
         for line in range(5):
@@ -85,9 +87,11 @@ class Craps:
         #first round, either 2x, 0x, or advances
         if sum1 in (7, 11):
             self.wallet.deposit(2*bet)
+            self.wins+=1
             print(f"Natural {sum1}! You won ${2*bet}!")
             return
         elif sum1 in (2, 3, 12):
+            self.losses+=1
             print(f"Craps ({sum1})! You lost ${bet}!")
             return
 
@@ -126,6 +130,7 @@ class Craps:
             dice1, dice2, sum2 = self.roll_dice()
 
             if sum2 == point:
+                self.wins+=1
                 if extra == True:
                     payout = round(2*bet+multiplier*extra_bet)
                     self.wallet.deposit(payout)
@@ -136,6 +141,7 @@ class Craps:
                 return
 
             if sum2 == 7:
+                self.losses+=1
                 if extra == True:
                     print(f"You rolled {dice1} and {dice2} (7) , You sevened out unfortunately. You lost ${bet+extra_bet}!")
                 else:
@@ -143,23 +149,36 @@ class Craps:
                 return
 
             print(f"You rolled {sum2} ({dice1} and {dice2}), not {point} or 7. Rerolling...")
+    
+    def show_stats(self):
+        total = self.wins + self.losses
+        win_rate = (self.wins / total * 100) if total else 0
+        print("\n--- CRAPS STATS ---")
+        print(f"Wins: {self.wins}")
+        print(f"Losses: {self.losses}")
+        print(f"Win rate: {win_rate:.1f}%")
+        print(f"Balance: ${self.wallet.balance}")
+        input("Press Enter to exit: ")
 
     def play(self):
         while self.wallet.balance > 0:
             print("\n--- CRAPS ---")
             print("1. Play")
-            print("2. Quit")
-
+            print("2. Stats")
+            print("3. Quit")
             choice = input("Select an option: ")
 
             if choice == "1":
                 self.play_round()
             elif choice == "2":
+                self.show_stats()
+            elif choice == "3":
                 break
             else:
                 print("Invalid option.")
 
-        print("Thanks for playing!")
+        print("Thanks for playing! Here are your final stats:")
+        self.show_stats()
 
 
 if __name__ == "__main__":
