@@ -110,3 +110,35 @@ def build_bets():
         )  # 17 is payout for splits
 
     return bets
+
+
+def parse_bet(words, bets, available):
+    if len(words) < 1:
+        raise ValueError("Use 'bet <chips> <type> [numbers]'. Type 'help' for examples.")
+
+    try:
+        stake = int(words[1])
+    except ValueError:
+        raise ValueError("Enter the stake as a whole number of chips") from None
+    if not 1 <= stake <= available:
+        if available == 0:
+            raise ValueError("No chips available")
+        raise ValueError(f"You can stake 1 to {available} chips.")
+
+    bet_type = words[2]
+    numbers = []
+    try:
+        for word in words[3:]:
+            numbers.append(int(word))
+    except ValueError:
+        raise ValueError("Enter the bet's number as a whole number.") from None
+    if bet_type == "split":
+        numbers.sort()
+
+    name_parts = [bet_type]
+    for number in numbers:
+        name_parts.append(str(number))
+    name = " ".join(name_parts)
+    if name not in bets:
+        raise ValueError("That bet is unavailable. Type 'help' for legal bets and examples.")
+    return name, stake
