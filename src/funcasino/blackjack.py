@@ -1,5 +1,5 @@
-from wallet import Wallet
-from deck import Deck
+from funcasino.wallet import Wallet
+from funcasino.deck import Deck
 import time
 
 class Blackjack:
