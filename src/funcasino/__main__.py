@@ -2,7 +2,7 @@ from funcasino.wallet import Wallet
 from funcasino.slots import Slots
 from funcasino.cointoss import CoinToss
 from funcasino.craps import Craps
-# from funcasino.blackjack import Blackjack
+from funcasino.blackjack import Blackjack
 
 LINE = " " + "─" * 39
 
@@ -23,7 +23,7 @@ def main():
         "1": lambda : Slots(wallet).play(),
         "2": lambda: CoinToss(wallet).play(),
         "3": lambda: Craps(wallet).play(),
-        # "4": lambda: Blackjack(wallet).play(),
+        "4": lambda: Blackjack(wallet).play(),
     }
 
     while wallet.balance > 0:
