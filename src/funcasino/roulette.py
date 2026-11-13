@@ -54,3 +54,59 @@ for row_index in range(len(TABLE_ROWS) - 1):
         bottom_left = bottom_row[column]
         bottom_right = bottom_row[column + 1]
         CORNERS[top_left] = {top_left, top_right, bottom_left, bottom_right}
+
+STARTING_BALANCE = 100
+
+HELP = """bet <chips> <type> [numbers]
+Examples: bet 5 red, bet 10 straight 17, bet 10 split 17 20
+Other types: black, even, odd, low, high, dozen 1–3, column 1–3
+For street and six-line, use the first number in the first row.
+For corner, use the smallest number it covers (e.g. corner 16).
+Commands: spin, clear, help, quit"""
+
+
+def spin():
+    return random.randrange(37)
+
+
+def settle_bet(pocket, bet, stake):
+    winning_pockets, payout = bet
+    if pocket in winning_pockets:
+        return payout * stake
+    return -stake
+
+
+def build_bets():
+    bets = {
+        "red": (RED.copy(), 1),
+        "black": (BLACK.copy(), 1),
+        "even": (EVEN.copy(), 1),
+        "odd": (ODD.copy(), 1),
+        "low": (LOW.copy(), 1),
+        "high": (HIGH.copy(), 1),
+        "dozen 1": (FIRST_DOZEN.copy(), 2),
+        "dozen 2": (SECOND_DOZEN.copy(), 2),
+        "dozen 3": (THIRD_DOZEN.copy(), 2),
+        "column 1": (FIRST_COLUMN.copy(), 2),
+        "column 2": (SECOND_COLUMN.copy(), 2),
+        "column 3": (THIRD_COLUMN.copy(), 2),
+    }
+
+    unique_bets = (
+        ("straight", STRAIGHTS, 35),
+        ("street", STREETS, 11),
+        ("corner", CORNERS, 8),
+        ("six-line", SIX_LINES, 5),
+    )
+
+    for bet_type, selections, payout in unique_bets:
+        for number, pockets in selections.items():
+            bets[f"{bet_type} {number}"] = (pockets.copy(), payout)
+
+    for (first, second), pockets in SPLITS.items():
+        bets[f"split {first} {second}"] = (
+            pockets.copy(),
+            17,
+        )  # 17 is payout for splits
+
+    return bets
