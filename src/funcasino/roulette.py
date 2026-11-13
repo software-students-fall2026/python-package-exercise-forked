@@ -142,3 +142,68 @@ def parse_bet(words, bets, available):
     if name not in bets:
         raise ValueError("That bet is unavailable. Type 'help' for legal bets and examples.")
     return name, stake
+
+def play_round(balance, bets, pending_bets):
+    pocket = spin()
+    if pocket == 0:
+        color = "green"
+    elif pocket in RED:
+        color = "red"
+    else:
+        color = "black"
+    print(f"Spin: {pocket} ({color})")
+
+    for name, stake in pending_bets:
+        change = settle_bet(pocket, bets[name], stake)
+        balance += change
+        print(f"{name}: {change:+d}")
+    print(f"Balance: {balance}")
+    return balance
+
+def main():
+    bets = build_bets()
+    balance = STARTING_BALANCE
+    pending_bets = []
+    print("Type 'help' for commands.")
+
+    while balance > 0:
+        chips_on_table = 0
+        for _, stake in pending_bets:
+            chips_on_table += stake
+        available = balance - chips_on_table
+        try:
+            words = input(f"{available} chips available > ").lower().split()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        if not words:
+            continue
+        if words == ["quit"]:
+            break
+        if words == ["help"]:
+            print(HELP)
+        elif words == ["clear"]:
+            pending_bets.clear()
+            print("Pending bets cleared")
+        elif words[0] == "bet":
+            try:
+                name, stake = parse_bet(words, bets, available)
+            except ValueError as error:
+                print(error)
+            else:
+                pending_bets.append((name, stake))
+        elif words == ["spin"]:
+            if not pending_bets:
+                print("Place at least one bet before spinning.")
+                continue
+
+            balance = play_round(balance, bets, pending_bets)
+            pending_bets.clear()
+        else:
+            print("Unknown command. Type 'help' for available commands.")
+
+    print(f"final balance: {balance} chips.")
+
+if __name__ == "__main__":
+    main()
