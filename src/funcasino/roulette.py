@@ -1,5 +1,6 @@
 import random
 
+
 class Roulette:
     RED = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36}
     BLACK = {2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35}
@@ -58,14 +59,41 @@ class Roulette:
 
     STARTING_BALANCE = 100
 
-    HELP = """bet <chips> <type> [numbers]
-    Examples: bet 5 red, bet 10 straight 17, bet 10 split 17 20
-    Other types: black, even, odd, low, high, dozen 1–3, column 1–3
-    For street and six-line, use the first number in the first row.
-    For corner, use the smallest number it covers (e.g. corner 16).
-    Commands: spin, clear, help, quit"""
+    BET_MENU = (
+        ("Red or black", "", "Enter red or black: "),
+        ("Even or odd", "", "Enter even or odd: "),
+        ("Low or high", "", "Enter low (1–18) or high (19–36): "),
+        ("Dozen", "dozen", "Enter 1 (1–12), 2 (13–24), or 3 (25–36): "),
+        ("Column", "column", "Enter 1 (1, 4, …), 2 (2, 5, …), or 3 (3, 6, …): "),
+        ("Straight", "straight", "Enter one pocket (0–36): "),
+        ("Split", "split", "Enter two neighboring pockets, e.g. 17 20: "),
+        ("Street", "street", "Enter the first number of the row, e.g. 16: "),
+        ("Corner", "corner", "Enter the smallest of the four numbers, e.g. 16: "),
+        (
+            "Six line",
+            "six-line",
+            "Enter the first number of two neighboring rows, e.g. 16: ",
+        ),
+    )
 
-    def __init__(self, starting_balance = STARTING_BALANCE):
+    HELP = (
+        "\n--- ROULETTE RULES & PAYOUTS ---\n"
+        "Place one or more bets, then spin. Every bet uses the same winning pocket.\n"
+        "The wheel has pockets 0–36. Green 0 loses all outside bets.\n"
+        "Payouts below show profit per $1 wagered.\n\n"
+        "Red/black, even/odd, low/high   1 to 1\n"
+        "Dozen or column               2 to 1\n"
+        "Straight (one pocket)        35 to 1\n"
+        "Split (two neighbors)        17 to 1\n"
+        "Street (one row of three)    11 to 1\n"
+        "Corner (two by two)           8 to 1\n"
+        "Six line (two full rows)      5 to 1\n\n"
+        "The betting table starts with 1 2 3, then 4 5 6, and so on.\n"
+        "For example, 16 17 18 sit directly above 19 20 21.\n"
+        "Zero can be bet straight or split with 1, 2, or 3."
+    )
+
+    def __init__(self, starting_balance=STARTING_BALANCE):
         if type(starting_balance) is not int or starting_balance < 0:
             raise ValueError("Starting balance must be a nonnegative whole number.")
         self.balance = starting_balance
@@ -80,13 +108,17 @@ class Roulette:
 
     def place_bet(self, name, stake):
         if type(stake) is not int:
-            raise ValueError("Enter the stake as a whole number of chips.")
+            raise ValueError("Enter a whole-dollar bet")
         available = self.available_chips()
         if not 1 <= stake <= available:
             if available == 0:
-                raise ValueError("No chips available.")
-            raise ValueError(f"You can stake 1 to {available} chips.")
+                raise ValueError("No money available.")
+            raise ValueError(f"Enter a bet from $1 to ${available}.")
 
+        bet_name = self.bet_name(name)
+        self._pending_bets.append((bet_name, stake))
+
+    def bet_name(self, name):
         words = name.lower().split()
         if not words:
             raise ValueError("Enter a bet type.")
@@ -96,7 +128,7 @@ class Roulette:
             for word in words[1:]:
                 numbers.append(int(word))
         except ValueError:
-            raise ValueError("Enter the bet's number as whole numbers.") from None
+            raise ValueError("Enter the bet's numbers as whole numbers.") from None
         if bet_type == "split":
             numbers.sort()
 
@@ -105,8 +137,8 @@ class Roulette:
             name_parts.append(str(number))
         bet_name = " ".join(name_parts)
         if bet_name not in self._bets:
-            raise ValueError("That bet is unavailable. Type 'help' for legal bets and examples")
-        self._pending_bets.append((bet_name, stake))
+            raise ValueError("Those numbers do not make a valid bet.")
+        return bet_name
 
     def clear_bets(self):
         self._pending_bets.clear()
@@ -164,16 +196,17 @@ class Roulette:
 
         return bets
 
+    # def parse_bet(self, words):
+    #     if len(words) < 1:
+    #         raise ValueError(
+    #             "Use 'bet <chips> <type> [numbers]'. Type 'help' for examples."
+    #         )
 
-    def parse_bet(self, words):
-        if len(words) < 1:
-            raise ValueError("Use 'bet <chips> <type> [numbers]'. Type 'help' for examples.")
-
-        try:
-            stake = int(words[1])
-        except ValueError:
-            raise ValueError("Enter the stake as a whole number of chips") from None
-        return " ".join(words[2:]), stake
+    #     try:
+    #         stake = int(words[1])
+    #     except ValueError:
+    #         raise ValueError("Enter the stake as a whole number of chips") from None
+    #     return " ".join(words[2:]), stake
 
     def print_spin(self, pocket, results):
         if pocket == 0:
@@ -182,50 +215,126 @@ class Roulette:
             color = "red"
         else:
             color = "black"
-        print(f"Spin: {pocket} ({color})")
-
+        print(f"\nThe ball landed on {pocket} ({color.upper()})!")
         for name, change in results:
-            print(f"{name}: {change:+d}")
-        print(f"Balance: {self.balance}")
+            if change > 0:
+                print(f"{name.title()}: You won ${change}!")
+            else:
+                print(f"{name.title()}: You lost ${abs(change)}.")
+        print(f"Balance: ${self.balance}")
+
+    def prompt_for_bet(self):
+        print("\nChoose a bet type (q to go back).")
+        for number, (label, _, _) in enumerate(self.BET_MENU, start=1):
+            print(f"{number}. {label}")
+
+        while True:
+            choice = input("Select a bet type: ").strip().lower()
+            if choice == "q":
+                return
+            try:
+                number = int(choice)
+            except ValueError:
+                print("Invalid option.")
+                continue
+            if 1 <= number <= len(self.BET_MENU):
+                label, bet_type, prompt = self.BET_MENU[number - 1]
+                break
+            print("Invalid option")
+
+        while True:
+            selection = input(prompt).strip().lower()
+            if selection == "q":
+                return
+            if not bet_type and selection not in label.lower().split(" or "):
+                print(f"Choose {label.lower()}.")
+                continue
+            try:
+                name = self.bet_name(f"{bet_type} {selection}")
+            except ValueError as error:
+                print(error)
+            else:
+                break
+
+        pockets, payout = self._bets[name]
+        numbers = []
+        for pocket in sorted(pockets):
+            numbers.append(str(pocket))
+        print(f"{name.title()} covers {', '.join(numbers)} and pays {payout} to 1.")
+        while True:
+            amount = (
+                input(
+                    f"Available: ${self.available_chips()}. Enter bet (q to go back): $"
+                )
+                .strip()
+                .lower()
+            )
+            if amount == "q":
+                return
+            try:
+                stake = int(amount.removeprefix("$"))
+            except ValueError:
+                print("Enter a whole-dollar bet.")
+                continue
+            try:
+                self.place_bet(name, stake)
+            except ValueError as error:
+                print(error)
+            else:
+                return
+
+    def play(self):
+        while self.balance > 0:
+            print("\n--- ROULETTE TABLE ---")
+            available = self.available_chips()
+            print(
+                f"Available: ${available} | On the table: ${self.balance - available}"
+            )
+            for name, stake in self._pending_bets:
+                print(f"{name.title()}: ${stake}")
+            print("1. Place a Bet\n2. Spin\n3. Clear Bets\n4. Back")
+            choice = input("Select an option: ").strip().lower()
+            if choice == "1":
+                if available == 0:
+                    print("You have no money left to bet this round.")
+                else:
+                    self.prompt_for_bet()
+            elif choice == "2":
+                if not self._pending_bets:
+                    print("Place at least one bet before spinning.")
+                else:
+                    pocket, result = self.spin()
+                    self.print_spin(pocket, result)
+            elif choice == "3":
+                self.clear_bets()
+                print("Bets cleared.")
+            elif choice in ("4", "q"):
+                self.clear_bets()
+                return
+            else:
+                print("Invalid option.")
 
     def run(self):
-        print("Type 'help' for commands.")
+        try:
+            while self.balance > 0:
+                print("\n--- ROULETTE ---")
+                print(f"Balance: ${self.balance}")
+                print("1. Play\n2. Rules & Payouts\n3. Quit")
+                choice = input("Select an option: ").strip().lower()
+                if choice == "1":
+                    self.play()
+                elif choice == "2":
+                    print(self.HELP)
+                elif choice in ("3", "q"):
+                    break
+                else:
+                    print("Invalid option.")
+        except (EOFError, KeyboardInterrupt):
+            print()
+        self.clear_bets()
+        print("Thanks for playing!")
+        return self.balance
 
-        while self.balance > 0:
-            available = self.available_chips()
-
-            try:
-                words = input(f"{available} chips available > ").lower().split()
-            except (EOFError, KeyboardInterrupt):
-                print()
-                break
-
-            if not words:
-                continue
-            if words == ["quit"]:
-                break
-            if words == ["help"]:
-                print(self.HELP)
-            elif words == ["clear"]:
-                self.clear_bets()
-                print("Pending bets cleared")
-            elif words[0] == "bet":
-                try:
-                    name, stake = self.parse_bet(words)
-                    self.place_bet(name, stake)
-                except ValueError as error:
-                    print(error)
-            elif words == ["spin"]:
-                try:
-                    pocket, results = self.spin()
-                except ValueError as error:
-                    print(error)
-                    continue
-                self.print_spin(pocket, results)
-            else:
-                print("Unknown command. Type 'help' for available commands.")
-
-        print(f"final balance: {self.balance} chips.")
 
 if __name__ == "__main__":
     Roulette().run()
