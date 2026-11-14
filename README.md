@@ -116,42 +116,51 @@ You won $25!
 ### Slots
 
 ### Craps
-CLI implementation of standard Pass Line Craps for the `funcasino` package.
+CLI implementation of Pass Line Craps with optional Point side bets for the `funcasino` package.
 
 #### How It Works
 
-* **Phase 1 (Come-Out Roll):** Win on 7 or 11. Lose on 2, 3, or 12 ("Craps"). Roll 4, 5, 6, 8, 9, or 10 to set the target Point.
-* **Phase 2 (Point Phase):** Reroll until hitting your Point number again to win, or rolling a 7 to lose ("Seven Out").
+- **Phase 1 (Come-Out Roll):** Place an initial wager. Roll 7 or 11 ("Natural") to win `2x` your bet immediately. Roll 2, 3, or 12 ("Craps") to lose your bet. Roll 4, 5, 6, 8, 9, or 10 to establish your Point.
+- **Phase 2 (Optional Side Bet):** Before rolling for the Point, you can place an extra bet on hitting your Point with tiered multipliers (`3x` on 4 or 10, `2.5x` on 5 or 9, and `2.2x` on 6 or 8).
+- **Phase 3 (Point Phase):** Reroll until hitting your Point again to win (paying `2x` your original bet plus `round(multiplier * extra_bet)` if you placed an extra bet), or rolling a 7 ("Seven Out") to lose your wager(s).
 
-#### Function Descriptions
+#### Class & Method Descriptions
 
-* `print_dice(dice1, dice2)`: Takes two die and prints an ASCII art representation in the terminal.
-* `play_craps(player)`: Main game controller function. Validates bets, runs Come-Out and Point roll loops, displays dice art, and updates the global `Player` object 
+- `Craps(wallet=None)`: Initializes the game with a shared `Wallet` instance (or creates a new one) and tracks session `wins` and `losses`.
+- `print_dice(dice1, dice2)`: Plays an in-place terminal roll animation before printing the final ASCII art for both dice.
+- `roll_dice()`: Rolls two 6-sided dice, displays them with `print_dice()`, and returns `(dice1, dice2, sum)`.
+- `place_bet()`: Prompts for and validates a whole-dollar bet against the current wallet balance and withdraws it.
+- `play_round()`: Runs a full round—handling the Come-Out roll, optional extra Point bet, and Point reroll loop—while updating the wallet and win/loss stats.
+- `show_stats()`: Displays total wins, losses, win rate percentage, and current wallet balance.
+- `play()`: Runs the interactive Craps submenu (`1. Play`, `2. Stats`, `3. Quit`) while the wallet balance is greater than `$0`.
 
 #### Example Output
 
 ```text
------- Welcome to CRAPS ------
-Current Balance: $100
-Enter your Pass Line bet: $25
+--- CRAPS ---
+1. Play
+2. Stats
+3. Quit
+Select an option: 1
+Balance: $100. Enter bet: $25
 Press Enter to roll the dice!
-
 ┌─────────┐  ┌─────────┐
 │  ●   ●  │  │  ●      │
 │    ●    │  │    ●    │
 │  ●   ●  │  │      ●  │
 └─────────┘  └─────────┘
-
-Your Point is now: 8. Try to hit 8 before rolling a 7!
-Press Enter to roll again...
-
+Your total is 8
+Your point is now: 8. Try to hit 8 before rolling a 7!
+Want to place an extra bet on 8?
+If you win, your extra bet pay out 2.2x and added on top of your original payout!
+[Y/N]: n
+Press Enter to roll again!
 ┌─────────┐  ┌─────────┐
 │  ●   ●  │  │  ●   ●  │
 │         │  │         │
 │  ●   ●  │  │  ●   ●  │
 └─────────┘  └─────────┘
-
-You hit your point (8)! You WIN $25! New Balance: $125
+You rolled 4 and 4 (8) , You hit your number! You won $50!
 ```
 
 ### Roulette
