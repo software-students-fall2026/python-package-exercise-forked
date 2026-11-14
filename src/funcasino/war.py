@@ -9,13 +9,13 @@ RANK_ORDER = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"]
 FRAME_HEIGHT = 9
 
 class War:
-    def __init__(self, wallet=None, hand_size=10, max_battles=30):
+    def __init__(self, wallet=None, hand_size=10, max_battles=20):
         self.wallet = wallet or Wallet()
         self.hand_size = hand_size
         self.max_battles = max_battles
         self.player_hand = deque()
         self.dealer_hand = deque()
-        self.delay = 0.6
+        self.delay = 1.0
         self.drawn = False
 
     def card_value(self, card):
@@ -69,3 +69,58 @@ class War:
         if p or d:
             (p if p else d).extend(pot)
         return None
+
+    def simulate(self, verbose=False):
+        self.deal_hands()
+        for _ in range(self.max_battles):
+            if not self.player_hand or not self.dealer_hand:
+                break
+            self.battle(verbose)
+
+        p, d = len(self.player_hand), len(self.dealer_hand)
+        if p > d:
+            return "player"
+        if d > p:
+            return "dealer"
+        return "tie"
+
+    PAYOUTS = {"player": 1, "dealer":1, "tie":8}
+
+    def place_bet(self):
+        while True:
+            try:
+                bet = int(input(f"Balance: ${self.wallet.balance}. Enter bet: $"))
+                if self.wallet.can_afford(bet):
+                    self.wallet.withdraw(bet)
+                    return bet
+                print("Invalid bet amount.")
+            except ValueError:
+                print("Please enter a valid number.")
+
+    def choose_side(self):
+        choice = input("Bet on (player / dealer / tie): ").lower()
+        while choice not in self.PAYOUTS:
+            choice = input("Please enter player, dealer, or tie: ").lower()
+        return choice
+
+    def payout(self, choice, result, bet):
+        if choice != result:
+            return 0
+        return bet + bet * self.PAYOUTS[choice]
+
+    def play_round(self):
+        bet = self.place_bet()
+        choice = self.choose_side()
+
+        print()
+        result = self.simulate(verbose=True)
+
+        print(f"\nFinal count - Player: {len(self.player_hand)} | Dealer: {len(self.dealer_hand)}")
+        print(f"Result: {result.upper()}")
+
+        winnings = self.payout(choice, result, bet)
+        self.wallet.deposit(winnings)
+        if winnings:
+            print(f"You won ${winnings - bet}!")
+        else:
+            print(f"You lost ${bet}.")

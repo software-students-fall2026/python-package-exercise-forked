@@ -3,6 +3,7 @@ from funcasino.slots import Slots
 from funcasino.cointoss import CoinToss
 from funcasino.craps import Craps
 from funcasino.blackjack import Blackjack
+from funcasino.war import War
 
 LINE = " " + "─" * 39
 
@@ -14,7 +15,7 @@ def show_menu(balance):
     print()
     print("   1 ▸ Slots          2 ▸ Coin Toss")
     print("   3 ▸ Craps          4 ▸ Blackjack")
-    print("                      Q ▸ Quit")
+    print("   5 ▸ War            Q ▸ Quit")
     print(LINE)
 
 def main():
@@ -24,6 +25,7 @@ def main():
         "2": lambda: CoinToss(wallet).play(),
         "3": lambda: Craps(wallet).play(),
         "4": lambda: Blackjack(wallet).play(),
+        "5": lambda: War(wallet).play_round()
     }
 
     while wallet.balance > 0:
