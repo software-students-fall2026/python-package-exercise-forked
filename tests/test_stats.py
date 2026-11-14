@@ -6,7 +6,6 @@ from funcasino.craps import Craps
 from funcasino.blackjack import Blackjack
 from funcasino.stats import show_stats
 
-
 def test_show_stats_empty(capsys):
     wallet = Wallet(100)
     games = {
@@ -25,7 +24,6 @@ def test_show_stats_empty(capsys):
     assert "Win Rate:     0.0%" in out
     assert "Net Profit:   $+0" in out
     assert "Balance:      $100" in out
-
 
 def test_show_stats_totals(capsys):
     wallet = Wallet(140)
@@ -59,7 +57,6 @@ def test_show_stats_totals(capsys):
     assert "Net Profit:   $+40" in out
     assert "Balance:      $140" in out
 
-
 def test_show_stats_ties_and_loss(capsys):
     wallet = Wallet(75)
     blackjack = Blackjack(wallet)
@@ -77,7 +74,6 @@ def test_show_stats_ties_and_loss(capsys):
     assert "Win Rate:     25.0%" in out
     assert "Net Profit:   $-25" in out
     assert "Balance:      $75" in out
-
 
 def test_show_stats_after_rounds(capsys):
     random.seed(1)
