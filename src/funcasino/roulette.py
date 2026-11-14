@@ -1,6 +1,7 @@
 import random
 from funcasino.wallet import Wallet, InsufficientFunds
 
+
 class Roulette:
     RED = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36}
     BLACK = {2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35}
@@ -100,7 +101,7 @@ class Roulette:
             wallet = Wallet(starting_balance)
         self.wallet = wallet
         self.wins = 0
-        self.losses=0
+        self.losses = 0
         self._bets = self.build_bets()
         self._pending_bets = []
 
@@ -158,10 +159,11 @@ class Roulette:
         if not self._pending_bets:
             raise ValueError("Place at least one bet before spinning.")
 
-
         total_stake = self.pending_stake()
         if not self.wallet.can_afford(total_stake):
-            raise InsufficientFunds(f"Balance is too low for the ${total_stake} on the table.")
+            raise InsufficientFunds(
+                f"Balance is too low for the ${total_stake} on the table."
+            )
         pocket = random.randrange(37)
         results = []
         total_return = 0
@@ -179,10 +181,10 @@ class Roulette:
         self.clear_bets()
         # based on profit or loss, says win or los
         net = total_return - total_stake
-        if net>0:
-            self.wins+=1
-        elif net<0:
-            self.losses+=1
+        if net > 0:
+            self.wins += 1
+        elif net < 0:
+            self.losses += 1
         return pocket, results
 
     def build_bets(self):
