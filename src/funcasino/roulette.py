@@ -26,7 +26,7 @@ class Roulette:
         TABLE_ROWS.append([first, first + 1, first + 2])
 
     SPLITS = {}
-    for pockets in TABLE_ROWS[0]:
+    for pocket in TABLE_ROWS[0]:
         SPLITS[(0, pocket)] = {0, pocket}
 
     STREETS = {}
@@ -170,7 +170,7 @@ class Roulette:
                 total_return += stake + change
             else:
                 change = -stake
-            self.balance += change
+            # self.balance += change
             results.append((name, change))
         self.wallet.withdraw(total_stake)
         self.wallet.deposit(total_return)
