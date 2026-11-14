@@ -99,6 +99,8 @@ class Roulette:
                 raise ValueError("Starting balance must be a nonnegative whole number.")
             wallet = Wallet(starting_balance)
         self.wallet = wallet
+        self.wins = 0
+        self.losses=0
         self._bets = self.build_bets()
         self._pending_bets = []
 
@@ -170,11 +172,17 @@ class Roulette:
                 total_return += stake + change
             else:
                 change = -stake
-            # self.balance += change
             results.append((name, change))
         self.wallet.withdraw(total_stake)
-        self.wallet.deposit(total_return)
+        if total_return > 0:
+            self.wallet.deposit(total_return)
         self.clear_bets()
+        # based on profit or loss, says win or los
+        net = total_return - total_stake
+        if net>0:
+            self.wins+=1
+        elif net<0:
+            self.losses+=1
         return pocket, results
 
     def build_bets(self):
