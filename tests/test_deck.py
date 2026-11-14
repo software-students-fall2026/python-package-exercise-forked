@@ -90,3 +90,7 @@ def test_shuffle(num_decks):
 
     assert deck.size() == 52 * num_decks
     assert Counter(deck.cards) == orig_cards
+@pytest.mark.parametrize("rank, suit", [("1", "Hearts"), ("Joker", "Spades"), ("a", "Clubs"), (10, "Hearts"), ("K", "Stars"), ("K", "hearts")])
+def test_card_invalid(rank, suit):
+    with pytest.raises(ValueError):
+        Card(rank, suit)
