@@ -188,3 +188,63 @@ def test_show_stats_no_games(capsys):
     assert "Win rate: 0.0%" in out
     assert "Wins: 0" in out
     assert "Balance: $100" in out
+
+def test_loss_hint():
+    slots = Slots()
+    assert slots.loss_hint(0) is None
+    assert slots.loss_hint(Slots.HINT_AFTER - 1) is None
+    assert slots.loss_hint(Slots.HINT_AFTER) in Slots.HOT_HINTS
+    assert slots.loss_hint(Slots.HINT_AFTER + 7) in Slots.HOT_HINTS
+
+def test_loss_hint_invalid():
+    slots = Slots()
+    with pytest.raises(ValueError):
+        slots.loss_hint(-1)
+    with pytest.raises(ValueError):
+        slots.loss_hint(-10)
+    assert slots.loss_hint(Slots.HINT_AFTER) is not None
+
+def test_loss_streak():
+    slots = Slots(Wallet(1000))
+    assert slots.loss_streak == 0
+    for _ in range(30):
+        _, winnings = slots.play_round(10, animate=False)
+        if winnings >= 10:
+            assert slots.loss_streak == 0
+        else:
+            assert slots.loss_streak >= 1
+    assert slots.loss_streak <= slots.losses
+
+def test_add_to_jackpot():
+    slots = Slots()
+    assert slots.jackpot == Slots.JACKPOT_START
+    assert slots.add_to_jackpot(100) == 10
+    assert slots.add_to_jackpot(5) == 1
+    assert slots.jackpot == Slots.JACKPOT_START + 11
+
+def test_add_to_jackpot_invalid():
+    slots = Slots()
+    with pytest.raises(ValueError):
+        slots.add_to_jackpot(0)
+    with pytest.raises(ValueError):
+        slots.add_to_jackpot(-20)
+    assert slots.jackpot == Slots.JACKPOT_START
+
+def test_jackpot_win():
+    wallet = Wallet(100)
+    slots = Slots(wallet)
+    slots.WEIGHTS = [0, 0, 0, 0, 1]
+    slots.jackpot = 1000
+    result, winnings = slots.play_round(10, animate=False)
+    assert result == ["💎", "💎", "💎"]
+    assert winnings == 10 * 100 + 1001
+    assert wallet.balance == 100 - 10 + 2001
+    assert slots.jackpot == Slots.JACKPOT_START
+
+def test_free_spin_no_jackpot_cut():
+    slots = Slots(Wallet(100))
+    slots.WEIGHTS = [1, 0, 0, 0, 0]
+    slots.play_round(10, animate=False, free=True)
+    assert slots.jackpot == Slots.JACKPOT_START
+    slots.play_round(10, animate=False)
+    assert slots.jackpot == Slots.JACKPOT_START + 1
