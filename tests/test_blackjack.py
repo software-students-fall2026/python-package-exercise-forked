@@ -1,7 +1,6 @@
 import pytest
 from funcasino.blackjack import Blackjack
-from funcasino.card import Card
-from funcasino.deck import Deck
+from funcasino.deck import Deck, Card
 
 def cards(*ranks):
     return [Card(rank, "Hearts") for rank in ranks]
