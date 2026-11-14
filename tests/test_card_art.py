@@ -72,3 +72,38 @@ def test_render_cards_custom_gap():
     assert all(" | " in row for row in rows)
     assert len(rows[0]) == 11 + 3 + 11
     assert render_cards(None, None, gap="").split("\n")[0] == "┌─────────┐┌─────────┐"
+
+def test_render_cards_empty():
+    assert render_cards() == "\n" * 6
+    assert len(render_cards().split("\n")) == 7
+    assert render_cards().strip() == ""
+
+def test_render_cards_invalid():
+    with pytest.raises(AttributeError):
+        render_cards("K of Hearts")
+    with pytest.raises(AttributeError):
+        render_cards(Card("K", "Hearts"), 5)
+    with pytest.raises(AttributeError):
+        render_cards(Card("K", "Hearts"), None, gap=3)
+
+def test_render_battle():
+    art = render_battle(Card("K", "Hearts"), Card("7", "Spades"))
+    rows = art.split("\n")
+    assert len(rows) == 8
+    assert "Player" in rows[0] and "Dealer" in rows[0]
+    assert rows[0].index("Player") < rows[0].index("Dealer")
+    assert rows[2] == "│ K       │        │ 7       │"
+
+def test_render_battle_vs_in_middle():
+    rows = render_battle(Card("2", "Clubs"), Card("A", "Diamonds")).split("\n")
+    assert "vs" in rows[4]
+    assert sum("vs" in row for row in rows) == 1
+    assert all(len(row) == 11 + 8 + 11 for row in rows[1:])
+
+def test_render_battle_invalid():
+    with pytest.raises(AttributeError):
+        render_battle(None, Card("K", "Hearts"))
+    with pytest.raises(AttributeError):
+        render_battle(Card("K", "Hearts"), None)
+    with pytest.raises(TypeError):
+        render_battle(Card("K", "Hearts"))
