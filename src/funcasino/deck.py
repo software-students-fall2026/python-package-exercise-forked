@@ -1,7 +1,15 @@
 import random
 
+SUITS = ("Hearts", "Diamonds", "Clubs", "Spades")
+RANKS = ("2", "3", "4", "5", "6", "7", "8", "9",
+         "10", "J", "Q", "K", "A")
+
 class Card:
     def __init__(self, rank, suit):
+        if rank not in RANKS:
+            raise ValueError(f"Invalid rank: {rank!r}")
+        if suit not in SUITS:
+            raise ValueError(f"Invalid suit: {suit!r}")
         self.rank = rank
         self.suit = suit
 
@@ -21,15 +29,11 @@ class Deck:
             raise TypeError("Number of decks must be an integer.")
         if num_decks < 1:
             raise ValueError("Number of decks must be at least 1.")
-        suits = ("Hearts", "Diamonds", "Clubs", "Spades")
-        ranks = ("2", "3", "4", "5", "6", "7", "8", "9",
-                 "10", "J", "Q", "K", "A")
-        
         self.cards = []
         self.num_decks = num_decks
         for i in range(num_decks):
-            for suit in suits:
-                for rank in ranks:
+            for suit in SUITS:
+                for rank in RANKS:
                     self.cards.append(Card(rank, suit))
         
     def shuffle(self):
