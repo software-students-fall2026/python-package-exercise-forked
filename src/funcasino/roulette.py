@@ -1,5 +1,5 @@
 import random
-
+from funcasino.wallet import Wallet, InsufficientFunds
 
 class Roulette:
     RED = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36}
@@ -93,18 +93,27 @@ class Roulette:
         "Zero can be bet straight or split with 1, 2, or 3."
     )
 
-    def __init__(self, starting_balance=STARTING_BALANCE):
-        if type(starting_balance) is not int or starting_balance < 0:
-            raise ValueError("Starting balance must be a nonnegative whole number.")
-        self.balance = starting_balance
+    def __init__(self, starting_balance=STARTING_BALANCE, wallet=None):
+        if wallet is None:
+            if type(starting_balance) is not int or starting_balance < 0:
+                raise ValueError("Starting balance must be a nonnegative whole number.")
+            wallet = Wallet(starting_balance)
+        self.wallet = wallet
         self._bets = self.build_bets()
         self._pending_bets = []
 
-    def available_chips(self):
-        available = self.balance
+    @property
+    def balance(self):
+        return self.wallet.balance
+
+    def pending_stake(self):
+        total = 0
         for _, stake in self._pending_bets:
-            available -= stake
-        return available
+            total += stake
+        return total
+
+    def available_chips(self):
+        return max(0, self.balance - self.pending_stake())
 
     def place_bet(self, name, stake):
         if type(stake) is not int:
@@ -147,17 +156,24 @@ class Roulette:
         if not self._pending_bets:
             raise ValueError("Place at least one bet before spinning.")
 
+
+        total_stake = self.pending_stake()
+        if not self.wallet.can_afford(total_stake):
+            raise InsufficientFunds(f"Balance is too low for the ${total_stake} on the table.")
         pocket = random.randrange(37)
         results = []
-
+        total_return = 0
         for name, stake in self._pending_bets:
             winning_pockets, payout = self._bets[name]
             if pocket in winning_pockets:
                 change = payout * stake
+                total_return += stake + change
             else:
                 change = -stake
             self.balance += change
             results.append((name, change))
+        self.wallet.withdraw(total_stake)
+        self.wallet.deposit(total_return)
         self.clear_bets()
         return pocket, results
 
@@ -303,7 +319,11 @@ class Roulette:
                 if not self._pending_bets:
                     print("Place at least one bet before spinning.")
                 else:
-                    pocket, result = self.spin()
+                    try:
+                        pocket, result = self.spin()
+                    except InsufficientFunds as error:
+                        print(error)
+                        continue
                     self.print_spin(pocket, result)
             elif choice == "3":
                 self.clear_bets()
