@@ -13,9 +13,9 @@ def wait_for_enter(stop):
 
 class Slots:
     SYMBOLS = ["🍒", "🍋", "🔔", "⭐", "💎"]
-    WEIGHTS = [50, 25, 13, 8, 4]
+    WEIGHTS = [45, 27, 15, 9, 4]
     NEAR_WEIGHTS = [30, 20, 15, 15, 20]
-    PAYOUTS = {"🍒": 5, "🍋": 10, "🔔": 15, "⭐": 25, "💎": 64}
+    PAYOUTS = {"🍒": 5, "🍋": 10, "🔔": 20, "⭐": 50, "💎": 100}
 
     def __init__(self, wallet=None):
         self.wallet = wallet or Wallet()
@@ -23,6 +23,8 @@ class Slots:
         self.losses = 0
         self.money_lost = 0
         self.rescue_used = False
+        self.biggest_win = 0
+        self.free_spins = 0
 
     def spin(self, weights=None):
         return random.choices(self.SYMBOLS, weights=weights or self.WEIGHTS, k=3)
@@ -44,6 +46,9 @@ class Slots:
 
     def is_near_miss(self, grid):
         return sum(row.count("💎") for row in grid) >= 2
+
+    def has_free_spin(self, grid):
+        return grid[0] == ["🔔"] * 3 or grid[2] == ["🔔"] * 3
 
     def estimate_rtp(self, spins=100000):
         total = sum(self.payout(self.spin(), 100) for _ in range(spins))
@@ -76,9 +81,10 @@ class Slots:
         self.draw_grid(grid)
         print(LINE)
 
-    def play_round(self, bet, animate=True):
-        all_in = bet == self.wallet.balance
-        self.wallet.withdraw(bet)
+    def play_round(self, bet, animate=True, free=False):
+        all_in = bet == self.wallet.balance and not free
+        if not free:
+            self.wallet.withdraw(bet)
         grid = self.spin_grid()
 
         if all_in and not self.rescue_used:
@@ -91,8 +97,11 @@ class Slots:
             self.animate_spin(grid)
         winnings = self.payout(result, bet)
         self.wallet.deposit(winnings)
+        self.biggest_win = max(self.biggest_win, winnings)
 
-        if winnings >= bet:
+        if free:
+            print(f"   🎁 Free spin won ${winnings}!")
+        elif winnings >= bet:
             self.wins += 1
             print(f"   🎉 You won ${winnings}!")
         elif winnings > 0:
@@ -107,19 +116,32 @@ class Slots:
         if winnings < bet and self.is_near_miss(grid):
             print("   💎 So close to the jackpot!")
 
+        if self.has_free_spin(grid):
+            self.free_spins += 1
+            print("   🔔 Bells on the edge! You earned a FREE SPIN!")
+
         return result, winnings
 
     def spin_mode(self):
+        last_bet = ""
         while self.wallet.balance > 0:
-            bet = input(f"   Balance: ${self.wallet.balance}. Enter bet (q to go back): $")
+            hint = f" (Press Enter = same bet: ${last_bet})" if last_bet else ""
+            bet = input(f"   Balance: ${self.wallet.balance}. Enter bet{hint} (q to go back): $")
             if bet == "q":
                 return
-                
+
+            if bet == "":
+                bet = last_bet
+
             if not bet.isdigit() or not self.wallet.can_afford(int(bet)):
                 print("   Invalid bet.")
                 continue
 
+            last_bet = bet
             self.play_round(int(bet))
+            while self.free_spins > 0:
+                self.free_spins -= 1
+                self.play_round(int(bet), free=True)
 
     def show_menu(self):
         print()
@@ -128,7 +150,7 @@ class Slots:
         print(f"   Balance: ${self.wallet.balance}")
         print()
         print("   1 ▸ Spin           2 ▸ Stats")
-        print("                      3 ▸ Quit")
+        print("   3 ▸ Paytable       4 ▸ Quit")
         print(LINE)
 
     def show_stats(self):
@@ -140,9 +162,21 @@ class Slots:
         print(f"   Wins: {self.wins}")
         print(f"   Losses: {self.losses}")
         print(f"   Money lost: ${self.money_lost}")
+        print(f"   Biggest win: ${self.biggest_win}")
         print(f"   Win rate: {win_rate:.1f}%")
         print(f"   Balance: ${self.wallet.balance}")
         print(f"   Machine payback: {self.estimate_rtp():.0%}")
+        print(LINE)
+
+    def show_paytable(self):
+        print()
+        print(" ♠ ♥ ♦ ♣     P A Y T A B L E     ♣ ♦ ♥ ♠")
+        print(LINE)
+        for symbol in self.SYMBOLS:
+            print(f"   {symbol} {symbol} {symbol}    pays {self.PAYOUTS[symbol]}x")
+        print("   🍒 🍒 ?     pays half your bet")
+        print()
+        print("   🔔 🔔 🔔 on top or bottom row = FREE SPIN")
         print(LINE)
 
     def play(self):
@@ -156,6 +190,9 @@ class Slots:
                 self.show_stats()
                 input("   Press q to go back: ")
             elif choice == "3":
+                self.show_paytable()
+                input("   Press q to go back: ")
+            elif choice == "4":
                 break
             else:
                 print("   Invalid option.")
