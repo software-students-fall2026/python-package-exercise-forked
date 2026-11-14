@@ -1,19 +1,16 @@
 import pytest
 from funcasino.wallet import Wallet, InsufficientFunds
 
-
 def test_default_balance():
     wallet = Wallet()
     assert wallet.balance == 100
     assert isinstance(wallet.balance, int)
     assert wallet.can_afford(100)
 
-
 def test_custom_balance():
     assert Wallet(500).balance == 500
     assert Wallet(0).balance == 0
     assert Wallet(1).balance == 1
-
 
 def test_balance_is_read_only():
     wallet = Wallet(50)
@@ -22,13 +19,11 @@ def test_balance_is_read_only():
     assert wallet.balance == 50
     assert wallet._balance == 50
 
-
 def test_can_afford_valid():
     wallet = Wallet(100)
     assert wallet.can_afford(1)
     assert wallet.can_afford(50)
     assert wallet.can_afford(100)
-
 
 def test_can_afford_invalid():
     wallet = Wallet(100)
@@ -36,7 +31,6 @@ def test_can_afford_invalid():
     assert not wallet.can_afford(0)
     assert not wallet.can_afford(-10)
     assert not Wallet(0).can_afford(1)
-
 
 def test_withdraw():
     wallet = Wallet(100)
@@ -46,7 +40,6 @@ def test_withdraw():
     assert wallet.balance == 0
     assert not wallet.can_afford(1)
 
-
 def test_withdraw_invalid_amount():
     wallet = Wallet(100)
     with pytest.raises(ValueError):
@@ -54,7 +47,6 @@ def test_withdraw_invalid_amount():
     with pytest.raises(ValueError):
         wallet.withdraw(-5)
     assert wallet.balance == 100
-
 
 def test_withdraw_insufficient_funds():
     wallet = Wallet(50)
@@ -64,14 +56,12 @@ def test_withdraw_insufficient_funds():
         Wallet(0).withdraw(1)
     assert wallet.balance == 50
 
-
 def test_insufficient_funds_is_value_error():
     assert issubclass(InsufficientFunds, ValueError)
     with pytest.raises(ValueError):
         Wallet(10).withdraw(20)
     with pytest.raises(InsufficientFunds, match=r"balance is only \$10"):
         Wallet(10).withdraw(20)
-
 
 def test_deposit():
     wallet = Wallet(100)
@@ -82,7 +72,6 @@ def test_deposit():
     wallet.deposit(1)
     assert wallet.balance == 151
 
-
 def test_deposit_invalid():
     wallet = Wallet(100)
     with pytest.raises(ValueError):
@@ -90,7 +79,6 @@ def test_deposit_invalid():
     with pytest.raises(ValueError):
         wallet.deposit(-100)
     assert wallet.balance == 100
-
 
 def test_shared_wallet():
     wallet = Wallet(100)
