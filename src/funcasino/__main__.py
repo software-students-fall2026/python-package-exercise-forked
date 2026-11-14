@@ -29,7 +29,6 @@ def main():
     blackjack = Blackjack(wallet)
     war = War(wallet)
     roulette = Roulette(wallet=wallet)
-
     games = {
         "1": slots.play,
         "2": cointoss.play,

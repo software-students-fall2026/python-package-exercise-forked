@@ -157,3 +157,55 @@ You hit your point (8)! You WIN $25! New Balance: $125
 ### Roulette
 
 ### War
+CLI implementation of the card game War for the `funcasino` package. Instead of playing yourself, you bet on who will win a simulated game between the Player and the Dealer.
+
+#### How It Works
+
+* Place a bet, then choose a side: `player`, `dealer`, or `tie`.
+* A shuffled deck deals 10 cards to each side. Each battle, both sides flip their top card, and the higher card takes both (2 is lowest, Ace is highest).
+* **WAR:** If the cards match, each side puts 3 cards face down and flips again. The winner takes the whole pot.
+* The game ends when one side runs out of cards or after 20 battles. Whoever holds more cards wins, and equal counts are a tie.
+* **Payouts:** Player or Dealer pays 1:1. Tie pays 8:1.
+
+#### Function Descriptions
+
+* `War(wallet=None, hand_size=10, max_battles=20)`: Creates a new game. Pass in a shared `Wallet` to use the same balance across games, or leave it empty to start with $100.
+* `card_value(card)`: Returns a card's strength (2 = 0 up to Ace = 12).
+* `deal_hands()`: Shuffles a new deck and deals `hand_size` cards to each side.
+* `battle(verbose=False)`: Runs one battle, including any wars, and returns `"player"`, `"dealer"`, or `None` if a side ran out of cards mid-war. With `verbose=True`, it shows the cards in the terminal.
+* `simulate(verbose=False)`: Deals and plays a full game, returning `"player"`, `"dealer"`, or `"tie"`.
+* `place_bet()`: Asks for a bet, keeps asking until it's valid, and takes it out of the wallet.
+* `choose_side()`: Asks which side to bet on.
+* `payout(choice, result, bet)`: Returns the amount won (stake included), or 0 if the bet lost.
+* `play_round()`: Runs one full round: bet, choose a side, watch the game, and get paid.
+
+#### Usage
+
+```python
+from funcasino.war import War
+from funcasino.wallet import Wallet
+
+game = War(Wallet(200))
+game.play_round()
+```
+
+#### Example Output
+
+```text
+Balance: $100. Enter bet: $20
+Bet on (player / dealer / tie): player
+
+   Player             Dealer
+┌─────────┐        ┌─────────┐
+│ K       │        │ 7       │
+│         │        │         │
+│    ♥    │   vs   │    ♠    │
+│         │        │         │
+│       K │        │       7 │
+└─────────┘        └─────────┘
+Player takes 2 cards  (Player: 11 | Dealer: 9)
+
+Final count - Player: 13 | Dealer: 7
+Result: PLAYER
+You won $20!
+```
