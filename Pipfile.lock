@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "26e05f10f548a9a1396c6adc07e066e37be89ed76f8980de74c483bb2261af9f"
+            "sha256": "c41fd74929ce50b30930dba4e2c9ef88becf08037774d6be38f6e5a88ea2cd2e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -17,8 +17,13 @@
     },
     "default": {
         "funcasino": {
-            "editable": true,
-            "path": "."
+            "hashes": [
+                "sha256:0e918a0b5a701acb375ac42073a9fcedcff35eb213a296300f436bb4995ac255",
+                "sha256:e25e0fd26a5927d3c877129180c9fc173f4257f31e3839d5905a0955a9511383"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==0.0.1"
         }
     },
     "develop": {
