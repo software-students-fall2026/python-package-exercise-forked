@@ -4,7 +4,7 @@
 
 FunCasino is a Python package that simulates some of the most popular casino games, including blackjack, roulette, and slots, for educational purposes.
 
-[PyPI Link](https://pypi.org/project/funcasino/0.0.1/)
+[PyPI Link](https://pypi.org/project/funcasino/)
 
 ## Team Members
 - [Shuo Cao](https://github.com/ShuoWu6529)
