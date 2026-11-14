@@ -15,6 +15,7 @@ class Slots:
     SYMBOLS = ["🍒", "🍋", "🔔", "⭐", "💎"]
     WEIGHTS = [45, 27, 15, 9, 4]
     NEAR_WEIGHTS = [30, 20, 15, 15, 20]
+    RESCUE_AFTER = 3
     PAYOUTS = {"🍒": 5, "🍋": 10, "🔔": 20, "⭐": 50, "💎": 100}
 
     def __init__(self, wallet=None):
@@ -87,7 +88,7 @@ class Slots:
             self.wallet.withdraw(bet)
         grid = self.spin_grid()
 
-        if all_in and not self.rescue_used:
+        if all_in and not self.rescue_used and self.wins + self.losses >= self.RESCUE_AFTER:
             grid[1] = ["🍋", "🍋", "🍋"]
             self.rescue_used = True
 
