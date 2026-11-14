@@ -115,6 +115,7 @@ You won $25!
 
 ### Slots
 
+
 ### Craps
 CLI implementation of standard Pass Line Craps for the `funcasino` package.
 
@@ -155,6 +156,95 @@ You hit your point (8)! You WIN $25! New Balance: $125
 ```
 
 ### Roulette
+CLI implementation of standard European Roulette for the `funcasino` package.
+
+#### How It Works
+
+* Place one or more bets, then spin. Every bet uses the same winning pocket.
+* The wheel has pockets 0–36. Green 0 loses all outside bets.
+* **Payouts:**
+   * Red/black, even/odd, low/high   1 to 1
+   * Dozen or column               2 to 1
+   * Straight (one pocket)        35 to 1
+   * Split (two neighbors)        17 to 1
+   * Street (one row of three)    11 to 1
+   * Corner (two by two)           8 to 1
+   * Six line (two full rows)      5 to 1
+
+#### Function Descriptions
+
+* `Roulette(starting_balance=100, *, wallet=None)`: Creates a new roulette game. Pass in a `Wallet` instance to use the same balance across games, or leave it empty to start with $100.
+* `balance`: Returns the current wallet balance.
+* `build_bets()`: Returns a dictionary that maps each valid bet name to its winning pockets and payout multiplier.
+* `bet_name(name)`: Validates a bet name.
+* `pending_stake()`: Returns the total amount the player bet on the current round.
+* `available_chips()`: Returns how much of the balance is available to bet after deducting for pending bets.
+* `place_bet(name, stake)`: Checks that the bet is valid, then adds it to the current round. The wallet is charged when the wheel spins.
+* `clear_bets()`: Removes all pending bets and frees up the amount reserved for them.
+* `spin()`: Picks one pocket from 0 to 36 and settles all pending bets through the wallet. Returns the winning pocket and a list of `(bet_name, net_change)` pairs.
+* `print_spin(pocket, results)`: Shows the winning pocket and color, each bet’s gain or loss, and the updated balance.
+* `prompt_for_bet()`: Guides the player through choosing a bet. The player can enter `q` to go back.
+* `play()`: Opens the table menu, where the player can place bets, spin, clear bets, or go back.
+* `run()`: Opens the main Roulette menu, where the player can play, view the rules and payouts, or quit. Returns the final wallet balance.
+
+#### Usage
+
+```python
+from funcasino.roulette import Roulette
+from funcasino.wallet import Wallet
+
+game = Roulette(Wallet(200))
+game.run()
+```
+
+#### Example Output
+
+```text
+--- ROULETTE ---
+Balance: $100
+1. Play
+2. Rules & Payouts
+3. Quit
+Select an option: 1
+
+--- ROULETTE TABLE ---
+Available: $100 | On the table: $0
+1. Place a Bet
+2. Spin
+3. Clear Bets
+4. Back
+Select an option: 1
+
+Choose a bet type (q to go back).
+1. Red or black
+2. Even or odd
+3. Low or high
+4. Dozen
+5. Column
+6. Straight
+7. Split
+8. Street
+9. Corner
+10. Six line
+Select a bet type: 1
+Enter red or black: red
+Red covers 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 and pays 1 to 1.
+Available: $100. Enter bet (q to go back): $100
+
+--- ROULETTE TABLE ---
+Available: $0 | On the table: $100
+Red: $100
+1. Place a Bet
+2. Spin
+3. Clear Bets
+4. Back
+Select an option: 2
+
+The ball landed on 25 (RED)!
+Red: You won $100!
+Balance: $200
+```
+
 
 ### War
 CLI implementation of the card game War for the `funcasino` package. Instead of playing yourself, you bet on who will win a simulated game between the Player and the Dealer.
