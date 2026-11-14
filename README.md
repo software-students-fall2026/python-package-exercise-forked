@@ -73,6 +73,46 @@ CLI implementation of a coin toss game for the `funcasino` package.
 
 #### How It Works
 
+* Place a bet (must be more than $0 and no more than your balance), then call heads or tails.
+* Guess correctly and you win your bet (1:1 payout). Guess wrong and you lose your bet.
+* The game keeps going until you quit or your balance hits $0. Your wins, losses, and the history of each round are tracked.
+
+#### Function Descriptions
+
+* `CoinToss(wallet=None)`: Creates a new game. Pass in a shared `Wallet` to use the same balance across games, or leave it empty to start with $100.
+* `flip_coin()`: Randomly returns `"heads"` or `"tails"`.
+* `animate_flip(result)`: Plays a short flipping animation in the terminal that lands on `result`.
+* `place_bet()`: Asks for a bet and keeps asking until it's a valid amount.
+* `play_round()`: Runs one round: bet, call heads or tails, flip, then update the balance, wins/losses, and `history`.
+* `show_stats()`: Prints wins, losses, win rate, and current balance.
+* `play()`: Main menu loop (Play / View Stats / Quit).
+
+#### Usage
+
+```python
+from funcasino.cointoss import CoinToss
+from funcasino.wallet import Wallet
+
+game = CoinToss(Wallet(200))
+game.play()
+```
+
+#### Example Output
+
+```text
+--- COIN TOSS ---
+1. Play
+2. View Stats
+3. Quit
+Select an option: 1
+Balance: $100. Enter bet: $25
+Heads or tails: heads
+Flipping coin...
+🪙 HEADS
+The coin landed on HEADS!
+You won $25!
+```
+
 ### Slots
 
 ### Craps
