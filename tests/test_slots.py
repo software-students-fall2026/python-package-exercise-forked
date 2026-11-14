@@ -112,22 +112,34 @@ def test_play_round_stats():
     assert slots.rescue_used is False
 
 def test_play_round_rescue():
-    wallet = Wallet(10)
+    wallet = Wallet(1000)
     slots = Slots(wallet)
-    result, winnings = slots.play_round(10, animate=False)
+    for _ in range(3):
+        slots.play_round(10, animate=False)
+    bet = wallet.balance
+    result, winnings = slots.play_round(bet, animate=False)
     assert result == ["🍋", "🍋", "🍋"]
-    assert winnings == 100
-    assert wallet.balance == 100
+    assert winnings == bet * 10
+    assert wallet.balance == bet * 10
     assert slots.rescue_used is True
-    assert slots.wins == 1
+
+def test_play_round_no_rescue_too_early():
+    for _ in range(20):
+        slots = Slots(Wallet(10))
+        slots.play_round(10, animate=False)
+        assert slots.rescue_used is False
+    assert slots.wins + slots.losses == 1
+    assert slots.wallet.balance >= 0
 
 def test_play_round_rescue_only_once():
-    wallet = Wallet(10)
+    wallet = Wallet(1000)
     slots = Slots(wallet)
-    slots.play_round(10, animate=False)
-    slots.play_round(100, animate=False)
+    for _ in range(3):
+        slots.play_round(10, animate=False)
+    slots.play_round(wallet.balance, animate=False)
+    slots.play_round(wallet.balance, animate=False)
     assert slots.rescue_used is True
-    assert slots.wins + slots.losses == 2
+    assert slots.wins + slots.losses == 5
     assert wallet.balance >= 0
 
 def test_play_round_invalid_bet():
