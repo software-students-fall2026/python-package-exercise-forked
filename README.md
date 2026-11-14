@@ -112,5 +112,8 @@ Press Enter to roll again...
 └─────────┘  └─────────┘
 
 You hit your point (8)! You WIN $25! New Balance: $125
+```
 
 ### Roulette
+
+### War
