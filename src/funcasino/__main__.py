@@ -15,10 +15,10 @@ def show_menu(balance):
     print(LINE)
     print(f"   Balance: ${balance}")
     print()
-    print("   1 ▸ Slots          2 ▸ Coin Toss")
-    print("   3 ▸ Craps          4 ▸ Blackjack")
-    print("   5 ▸ War            6 ▸ Roulette")
-    print("   7 ▸ Stats          Q ▸ Quit")
+    print("   1 ▸ Slots           2 ▸ Coin Toss")
+    print("   3 ▸ Craps           4 ▸ Blackjack")
+    print("   5 ▸ War             6 ▸ Roulette")
+    print("   7 ▸ Stats           Q ▸ Quit")
     print(LINE)
 
 def main():
@@ -29,13 +29,14 @@ def main():
     blackjack = Blackjack(wallet)
     war = War(wallet)
     roulette = Roulette(wallet=wallet)
+
     games = {
         "1": slots.play,
         "2": cointoss.play,
         "3": craps.play,
         "4": blackjack.play,
         "5": war.play_round,
-        "6": roulette.play,
+        "6": roulette.run,
     }
 
     game_stats = {
