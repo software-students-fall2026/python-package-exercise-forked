@@ -1,6 +1,5 @@
 LINE = " " + "─" * 39
 
-
 def show_stats(games, wallet, starting_balance=100):
     total_wins = 0
     total_losses = 0
@@ -33,6 +32,6 @@ def show_stats(games, wallet, starting_balance=100):
     if total_ties:
         print(f"   Total Ties:   {total_ties}")
     print(f"   Win Rate:     {win_rate:.1f}%")
-    print(f"   Net Profit:   ${net:+d}")
+    print(f"   Net Profit:   ${net:+}")
     print(f"   Balance:      ${wallet.balance}")
     print(LINE)

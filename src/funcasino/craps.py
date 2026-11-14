@@ -36,7 +36,6 @@ dice_art = {
         "└─────────┘")
 }
 
-
 class Craps:
     def __init__(self, wallet=None):
         self.wallet = wallet or Wallet()
@@ -177,9 +176,7 @@ class Craps:
             else:
                 print("Invalid option.")
 
-        print("Thanks for playing! Here are your final stats:")
-        self.show_stats()
-
+        print("Thanks for playing!")
 
 if __name__ == "__main__":
     game = Craps()

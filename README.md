@@ -115,46 +115,145 @@ You won $25!
 
 ### Slots
 
+
 ### Craps
-CLI implementation of standard Pass Line Craps for the `funcasino` package.
+CLI implementation of Pass Line Craps with optional Point side bets for the `funcasino` package.
 
 #### How It Works
 
-* **Phase 1 (Come-Out Roll):** Win on 7 or 11. Lose on 2, 3, or 12 ("Craps"). Roll 4, 5, 6, 8, 9, or 10 to set the target Point.
-* **Phase 2 (Point Phase):** Reroll until hitting your Point number again to win, or rolling a 7 to lose ("Seven Out").
+- **Phase 1 (Come-Out Roll):** Place an initial wager. Roll 7 or 11 ("Natural") to win `2x` your bet immediately. Roll 2, 3, or 12 ("Craps") to lose your bet. Roll 4, 5, 6, 8, 9, or 10 to establish your Point.
+- **Phase 2 (Optional Side Bet):** Before rolling for the Point, you can place an extra bet on hitting your Point with tiered multipliers (`3x` on 4 or 10, `2.5x` on 5 or 9, and `2.2x` on 6 or 8).
+- **Phase 3 (Point Phase):** Reroll until hitting your Point again to win (paying `2x` your original bet plus `round(multiplier * extra_bet)` if you placed an extra bet), or rolling a 7 ("Seven Out") to lose your wager(s).
 
-#### Function Descriptions
+#### Class & Method Descriptions
 
-* `print_dice(dice1, dice2)`: Takes two die and prints an ASCII art representation in the terminal.
-* `play_craps(player)`: Main game controller function. Validates bets, runs Come-Out and Point roll loops, displays dice art, and updates the global `Player` object 
+- `Craps(wallet=None)`: Initializes the game with a shared `Wallet` instance (or creates a new one) and tracks session `wins` and `losses`.
+- `print_dice(dice1, dice2)`: Plays an in-place terminal roll animation before printing the final ASCII art for both dice.
+- `roll_dice()`: Rolls two 6-sided dice, displays them with `print_dice()`, and returns `(dice1, dice2, sum)`.
+- `place_bet()`: Prompts for and validates a whole-dollar bet against the current wallet balance and withdraws it.
+- `play_round()`: Runs a full round—handling the Come-Out roll, optional extra Point bet, and Point reroll loop—while updating the wallet and win/loss stats.
+- `show_stats()`: Displays total wins, losses, win rate percentage, and current wallet balance.
+- `play()`: Runs the interactive Craps submenu (`1. Play`, `2. Stats`, `3. Quit`) while the wallet balance is greater than `$0`.
 
 #### Example Output
 
 ```text
------- Welcome to CRAPS ------
-Current Balance: $100
-Enter your Pass Line bet: $25
+--- CRAPS ---
+1. Play
+2. Stats
+3. Quit
+Select an option: 1
+Balance: $100. Enter bet: $25
 Press Enter to roll the dice!
-
 ┌─────────┐  ┌─────────┐
 │  ●   ●  │  │  ●      │
 │    ●    │  │    ●    │
 │  ●   ●  │  │      ●  │
 └─────────┘  └─────────┘
-
-Your Point is now: 8. Try to hit 8 before rolling a 7!
-Press Enter to roll again...
-
+Your total is 8
+Your point is now: 8. Try to hit 8 before rolling a 7!
+Want to place an extra bet on 8?
+If you win, your extra bet pay out 2.2x and added on top of your original payout!
+[Y/N]: n
+Press Enter to roll again!
 ┌─────────┐  ┌─────────┐
 │  ●   ●  │  │  ●   ●  │
 │         │  │         │
 │  ●   ●  │  │  ●   ●  │
 └─────────┘  └─────────┘
-
-You hit your point (8)! You WIN $25! New Balance: $125
+You rolled 4 and 4 (8) , You hit your number! You won $50!
 ```
 
 ### Roulette
+CLI implementation of standard European Roulette for the `funcasino` package.
+
+#### How It Works
+
+* Place one or more bets, then spin. Every bet uses the same winning pocket.
+* The wheel has pockets 0–36. Green 0 loses all outside bets.
+* **Payouts:**
+   * Red/black, even/odd, low/high   1 to 1
+   * Dozen or column               2 to 1
+   * Straight (one pocket)        35 to 1
+   * Split (two neighbors)        17 to 1
+   * Street (one row of three)    11 to 1
+   * Corner (two by two)           8 to 1
+   * Six line (two full rows)      5 to 1
+
+#### Function Descriptions
+
+* `Roulette(starting_balance=100, *, wallet=None)`: Creates a new roulette game. Pass in a `Wallet` instance to use the same balance across games, or leave it empty to start with $100.
+* `balance`: Returns the current wallet balance.
+* `build_bets()`: Returns a dictionary that maps each valid bet name to its winning pockets and payout multiplier.
+* `bet_name(name)`: Validates a bet name.
+* `pending_stake()`: Returns the total amount the player bet on the current round.
+* `available_chips()`: Returns how much of the balance is available to bet after deducting for pending bets.
+* `place_bet(name, stake)`: Checks that the bet is valid, then adds it to the current round. The wallet is charged when the wheel spins.
+* `clear_bets()`: Removes all pending bets and frees up the amount reserved for them.
+* `spin()`: Picks one pocket from 0 to 36 and settles all pending bets through the wallet. Returns the winning pocket and a list of `(bet_name, net_change)` pairs.
+* `print_spin(pocket, results)`: Shows the winning pocket and color, each bet’s gain or loss, and the updated balance.
+* `prompt_for_bet()`: Guides the player through choosing a bet. The player can enter `q` to go back.
+* `play()`: Opens the table menu, where the player can place bets, spin, clear bets, or go back.
+* `run()`: Opens the main Roulette menu, where the player can play, view the rules and payouts, or quit. Returns the final wallet balance.
+
+#### Usage
+
+```python
+from funcasino.roulette import Roulette
+from funcasino.wallet import Wallet
+
+game = Roulette(Wallet(200))
+game.run()
+```
+
+#### Example Output
+
+```text
+--- ROULETTE ---
+Balance: $100
+1. Play
+2. Rules & Payouts
+3. Quit
+Select an option: 1
+
+--- ROULETTE TABLE ---
+Available: $100 | On the table: $0
+1. Place a Bet
+2. Spin
+3. Clear Bets
+4. Back
+Select an option: 1
+
+Choose a bet type (q to go back).
+1. Red or black
+2. Even or odd
+3. Low or high
+4. Dozen
+5. Column
+6. Straight
+7. Split
+8. Street
+9. Corner
+10. Six line
+Select a bet type: 1
+Enter red or black: red
+Red covers 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 and pays 1 to 1.
+Available: $100. Enter bet (q to go back): $100
+
+--- ROULETTE TABLE ---
+Available: $0 | On the table: $100
+Red: $100
+1. Place a Bet
+2. Spin
+3. Clear Bets
+4. Back
+Select an option: 2
+
+The ball landed on 25 (RED)!
+Red: You won $100!
+Balance: $200
+```
+
 
 ### War
 CLI implementation of the card game War for the `funcasino` package. Instead of playing yourself, you bet on who will win a simulated game between the Player and the Dealer.
