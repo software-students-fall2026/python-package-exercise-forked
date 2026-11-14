@@ -114,6 +114,72 @@ You won $25!
 ```
 
 ### Slots
+CLI implementation of a 3×3 slot machine for the `funcasino` package, built with the same tricks real casino machines use.
+
+#### How It Works
+
+* Place a bet (must be more than $0 and no more than your balance), then press Enter to stop the reels.
+* Only the middle row (inside the box) counts. Three matching symbols pay out:
+   * 🍒 🍒 🍒   5x
+   * 🍋 🍋 🍋   10x
+   * 🔔 🔔 🔔   20x
+   * ⭐ ⭐ ⭐   50x
+   * 💎 💎 💎   100x + the progressive jackpot
+   * 🍒 🍒 ?    half your bet back
+* The reels are weighted, so common symbols land far more often than rare ones and the machine always pays back less than you bet over time.
+* **Near misses:** 💎 shows up more often above and below the payline, so the jackpot always looks close.
+* **Progressive jackpot:** starts at $500 and grows by 10% of every bet until someone hits 💎 💎 💎.
+* **Free spins:** three 🔔 on the top or bottom row earns a free spin.
+* **Loss-streak hints:** after 3 losses in a row, the machine hints that a big win is coming.
+* **Rescue:** after 3 spins, the first time you bet your whole balance you're given a 🍋 🍋 🍋 win.
+* Press Enter without typing a bet to reuse your last bet.
+
+#### Function Descriptions
+
+* `Slots(wallet=None)`: Creates a new game. Pass in a shared `Wallet` to use the same balance across games, or leave it empty to start with $100.
+* `spin(weights=None)`: Returns 3 random symbols, using `WEIGHTS` unless other weights are passed in.
+* `spin_grid()`: Returns a 3×3 grid. The top and bottom rows use `NEAR_WEIGHTS`.
+* `payout(result, bet)`: Returns the amount won for a row of 3 symbols, or 0. Raises `ValueError` if `bet` is not positive.
+* `is_near_miss(grid)`: Returns `True` if 2 or more 💎 appear anywhere on the grid.
+* `has_free_spin(grid)`: Returns `True` if the top or bottom row is all 🔔.
+* `loss_hint(streak)`: Returns a random hint once `streak` reaches 3, otherwise `None`. Raises `ValueError` if `streak` is negative.
+* `add_to_jackpot(bet)`: Adds 10% of `bet` (at least $1) to the jackpot and returns the amount added. Raises `ValueError` if `bet` is not positive.
+* `estimate_rtp(spins=100000)`: Simulates `spins` spins and returns the machine's payback rate.
+* `draw_grid(grid)`: Prints the grid with a box around the middle row.
+* `animate_spin(grid)`: Spins the reels until Enter is pressed, then shows `grid`.
+* `play_round(bet, animate=True, free=False)`: Runs one spin and updates the wallet, stats, jackpot and free spins. Returns `(result, winnings)`.
+* `spin_mode()`: Keeps asking for bets until you type `q` or run out of money.
+* `show_menu()`: Prints the slots menu with your balance and the jackpot.
+* `show_stats()`: Prints wins, losses, money lost, biggest win, win rate, balance and machine payback.
+* `show_paytable()`: Prints what each combination pays.
+* `play()`: Main menu loop (Spin / Stats / Paytable / Quit).
+
+#### Usage
+
+```python
+from funcasino.slots import Slots
+from funcasino.wallet import Wallet
+
+game = Slots(Wallet(200))
+game.play()
+```
+
+#### Example Output
+
+```text
+ ♠ ♥ ♦ ♣        S L O T S        ♣ ♦ ♥ ♠
+ ───────────────────────────────────────
+   💰 Jackpot: $501
+   Press Enter to stop the reels!
+              💎   🍋   ⭐
+           ┌────────────────┐
+           │  🍒   🍒   🍋  │
+           └────────────────┘
+              🔔   💎   🍒
+ ───────────────────────────────────────
+   🎉 WINNER! You won $5!
+   💎 So close to the jackpot!
+```
 
 ### Craps
 CLI implementation of standard Pass Line Craps for the `funcasino` package.
