@@ -27,7 +27,7 @@ def main():
     cointoss = CoinToss(wallet)
     craps = Craps(wallet)
     blackjack = Blackjack(wallet)
-    war = war(wallet)
+    war = War(wallet)
     #roulette = Roulette(wallet)
 
     games = {
