@@ -3,7 +3,6 @@ import pytest
 from funcasino.slots import Slots
 from funcasino.wallet import Wallet, InsufficientFunds
 
-
 def test_init_default_wallet():
     slots = Slots()
     assert slots.wallet.balance == 100
