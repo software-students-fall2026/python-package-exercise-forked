@@ -3,6 +3,7 @@ from funcasino.slots import Slots
 from funcasino.cointoss import CoinToss
 from funcasino.craps import Craps
 from funcasino.blackjack import Blackjack
+from funcasino.war import War
 from funcasino.roulette import Roulette
 from funcasino.stats import show_stats
 
@@ -16,8 +17,8 @@ def show_menu(balance):
     print()
     print("   1 ▸ Slots          2 ▸ Coin Toss")
     print("   3 ▸ Craps          4 ▸ Blackjack")
-    print("   5 ▸ Roulette       6 ▸ Stats")
-    print("                      Q ▸ Quit")
+    print("   5 ▸ War           6 ▸ Roulette")
+    print("   7▸ Stats          Q ▸ Quit")
     print(LINE)
 
 def main():
@@ -26,6 +27,7 @@ def main():
     cointoss = CoinToss(wallet)
     craps = Craps(wallet)
     blackjack = Blackjack(wallet)
+    war = war(wallet)
     #roulette = Roulette(wallet)
 
     games = {
@@ -33,6 +35,7 @@ def main():
         "2": cointoss.play,
         "3": craps.play,
         "4": blackjack.play,
+        "5": War.play_round,
         #"5": roulette.play,
     }
 
@@ -41,6 +44,7 @@ def main():
     "Coin Toss": cointoss,
     "Craps": craps,
     "Blackjack": blackjack,
+    "War": war,
     #"Roulette": roulette,
     }
 
