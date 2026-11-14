@@ -174,7 +174,8 @@ class Roulette:
                 change = -stake
             results.append((name, change))
         self.wallet.withdraw(total_stake)
-        self.wallet.deposit(total_return)
+        if total_return > 0:
+            self.wallet.deposit(total_return)
         self.clear_bets()
         # based on profit or loss, says win or los
         net = total_return - total_stake
