@@ -15,6 +15,17 @@ class Slots:
     SYMBOLS = ["🍒", "🍋", "🔔", "⭐", "💎"]
     WEIGHTS = [45, 27, 15, 9, 4]
     NEAR_WEIGHTS = [30, 20, 15, 15, 20]
+    RESCUE_AFTER = 3
+    HINT_AFTER = 3
+    HOT_HINTS = [
+        "   🔥 The machine is heating up...",
+        "   👀 A big win is coming...",
+        "   🍀 Luck has to turn eventually, right?",
+        "   🎰 Next time for sure.",
+        "   📈 What is this pittance of money but an investment?",
+        "   🙏 Please please please please please",
+    ]
+    JACKPOT_START = 500
     PAYOUTS = {"🍒": 5, "🍋": 10, "🔔": 20, "⭐": 50, "💎": 100}
 
     def __init__(self, wallet=None):
@@ -25,6 +36,8 @@ class Slots:
         self.rescue_used = False
         self.biggest_win = 0
         self.free_spins = 0
+        self.loss_streak = 0
+        self.jackpot = self.JACKPOT_START
 
     def spin(self, weights=None):
         return random.choices(self.SYMBOLS, weights=weights or self.WEIGHTS, k=3)
@@ -50,6 +63,20 @@ class Slots:
     def has_free_spin(self, grid):
         return grid[0] == ["🔔"] * 3 or grid[2] == ["🔔"] * 3
 
+    def loss_hint(self, streak):
+        if streak < 0:
+            raise ValueError("streak cannot be negative")
+        if streak < self.HINT_AFTER:
+            return None
+        return random.choice(self.HOT_HINTS)
+
+    def add_to_jackpot(self, bet):
+        if bet <= 0:
+            raise ValueError("bet must be positive")
+        cut = max(1, bet // 10)
+        self.jackpot += cut
+        return cut
+
     def estimate_rtp(self, spins=100000):
         total = sum(self.payout(self.spin(), 100) for _ in range(spins))
         return total / (spins * 100)
@@ -66,6 +93,7 @@ class Slots:
         print()
         print(TITLE)
         print(LINE)
+        print(f"   💰 Jackpot: ${self.jackpot}")
         print("   Press Enter to stop the reels!")
 
         stop = threading.Event()
@@ -85,9 +113,10 @@ class Slots:
         all_in = bet == self.wallet.balance and not free
         if not free:
             self.wallet.withdraw(bet)
+            self.add_to_jackpot(bet)
         grid = self.spin_grid()
 
-        if all_in and not self.rescue_used:
+        if all_in and not self.rescue_used and self.wins + self.losses >= self.RESCUE_AFTER:
             grid[1] = ["🍋", "🍋", "🍋"]
             self.rescue_used = True
 
@@ -96,6 +125,12 @@ class Slots:
         if animate:
             self.animate_spin(grid)
         winnings = self.payout(result, bet)
+
+        if result == ["💎"] * 3:
+            print(f"   💰💰 PROGRESSIVE JACKPOT! +${self.jackpot}! 💰💰")
+            winnings += self.jackpot
+            self.jackpot = self.JACKPOT_START
+
         self.wallet.deposit(winnings)
         self.biggest_win = max(self.biggest_win, winnings)
 
@@ -103,18 +138,26 @@ class Slots:
             print(f"   🎁 Free spin won ${winnings}!")
         elif winnings >= bet:
             self.wins += 1
+            self.loss_streak = 0
             print(f"   🎉 You won ${winnings}!")
         elif winnings > 0:
             self.losses += 1
+            self.loss_streak += 1
             self.money_lost += bet - winnings
             print(f"   🎉 WINNER! You won ${winnings}!")
         else:
             self.losses += 1
+            self.loss_streak += 1
             self.money_lost += bet
             print(f"   You lost ${bet}.")
 
         if winnings < bet and self.is_near_miss(grid):
             print("   💎 So close to the jackpot!")
+
+        if not free:
+            hint = self.loss_hint(self.loss_streak)
+            if hint:
+                print(hint)
 
         if self.has_free_spin(grid):
             self.free_spins += 1
@@ -148,6 +191,7 @@ class Slots:
         print(TITLE)
         print(LINE)
         print(f"   Balance: ${self.wallet.balance}")
+        print(f"   💰 Jackpot: ${self.jackpot}")
         print()
         print("   1 ▸ Spin           2 ▸ Stats")
         print("   3 ▸ Paytable       4 ▸ Quit")
@@ -175,6 +219,7 @@ class Slots:
         for symbol in self.SYMBOLS:
             print(f"   {symbol} {symbol} {symbol}    pays {self.PAYOUTS[symbol]}x")
         print("   🍒 🍒 ?     pays half your bet")
+        print(f"   💎 💎 💎    also wins the JACKPOT (${self.jackpot})")
         print()
         print("   🔔 🔔 🔔 on top or bottom row = FREE SPIN")
         print(LINE)
