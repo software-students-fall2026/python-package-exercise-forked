@@ -12,10 +12,16 @@ def make_hand(*ranks, bet=10, status="Playing"):
         "status": status,
     }
 
+def set_balance(wallet, amount):
+    if wallet.balance > amount:
+        wallet.withdraw(wallet.balance - amount)
+    elif wallet.balance < amount:
+        wallet.deposit(amount - wallet.balance)
+
 @pytest.fixture
 def game():
     game = Blackjack()
-    game.wallet.balance = 100
+    set_balance(game.wallet, 100)
     return game
 
 def test_initial_state(game):
@@ -59,7 +65,7 @@ def test_hand_value_does_not_change_cards(game):
     ],
 )
 def test_can_split(game, ranks, status, balance, count, expected):
-    game.wallet.balance = balance
+    set_balance(game.wallet, balance)
     hand = make_hand(*ranks, status=status)
     hands = [hand] + [make_hand("2", "3") for _ in range(count - 1)]
 
