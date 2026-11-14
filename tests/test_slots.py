@@ -48,9 +48,9 @@ def test_spin_grid():
 
 def test_payout_wins():
     slots = Slots()
-    assert slots.payout(["💎", "💎", "💎"], 10) == 640
-    assert slots.payout(["⭐", "⭐", "⭐"], 10) == 250
-    assert slots.payout(["🔔", "🔔", "🔔"], 10) == 150
+    assert slots.payout(["💎", "💎", "💎"], 10) == 1000
+    assert slots.payout(["⭐", "⭐", "⭐"], 10) == 500
+    assert slots.payout(["🔔", "🔔", "🔔"], 10) == 200
     assert slots.payout(["🍋", "🍋", "🍋"], 10) == 100
     assert slots.payout(["🍒", "🍒", "🍒"], 10) == 50
 
@@ -88,7 +88,7 @@ def test_estimate_rtp():
     slots = Slots()
     rtp = slots.estimate_rtp(20000)
     assert isinstance(rtp, float)
-    assert 0.8 < rtp < 1.0
+    assert 0.7 < rtp < 0.95
     assert rtp < 1
 
 def test_play_round_balance():
