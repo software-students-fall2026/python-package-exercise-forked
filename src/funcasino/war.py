@@ -17,6 +17,8 @@ class War:
         self.dealer_hand = deque()
         self.delay = 1.0
         self.drawn = False
+        self.wins = 0
+        self.losses = 0
 
     def card_value(self, card):
         return RANK_ORDER.index(card.rank)
@@ -121,6 +123,9 @@ class War:
         winnings = self.payout(choice, result, bet)
         self.wallet.deposit(winnings)
         if winnings:
+            self.wins += 1
             print(f"You won ${winnings - bet}!")
         else:
+            self.losses += 1
             print(f"You lost ${bet}.")
+        print(f"Record: {self.wins}W / {self.losses}L")

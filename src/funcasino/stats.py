@@ -1,6 +1,5 @@
 LINE = " " + "─" * 39
 
-
 def show_stats(games, wallet, starting_balance=100):
     total_wins = 0
     total_losses = 0
