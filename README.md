@@ -67,6 +67,44 @@ To contribute to issues:
 ## Documentation
 
 ### Blackjack
+CLI implementation of blackjack for the `funcasino` package.
+
+#### How It Works
+
+* Place a bet (must be more than $0 and no more than your balance)
+* 
+* The game keeps going until you quit or your balance hits $0. Your wins, losses, pushes, and overall win statistics are tracked.
+
+#### Function Descriptions
+
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+* `CoinToss(wallet=None)`
+
+#### Usage
+
+```python
+from funcasino.blackjack import Blackjack
+from funcasino.wallet import Wallet
+
+game = Blackjack(Wallet(200))
+game.play()
+```
+
+#### Example Output
+
+```text
+
+```
 
 ### Coin Toss
 CLI implementation of a coin toss game for the `funcasino` package.
