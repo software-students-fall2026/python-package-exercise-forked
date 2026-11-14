@@ -4,7 +4,7 @@
 
 FunCasino is a Python package that simulates some of the most popular casino games, including blackjack, roulette, and slots, for educational purposes.
 
-<!-- [PyPI Link](https://www.google.com/) -->
+[PyPI Link](https://pypi.org/project/funcasino/0.0.1/)
 
 ## Team Members
 - [Shuo Cao](https://github.com/ShuoWu6529)
@@ -72,23 +72,25 @@ CLI implementation of blackjack for the `funcasino` package.
 #### How It Works
 
 * Place a bet (must be more than $0 and no more than your balance)
-* 
+* Try to hit 21 or as close to 21 without hitting over as well as having a higher value than the dealer, who will always hit until getting at least 17 in value.
+* Each game is played with a set of 8 decks so card counting is very difficult.
+* If you have a starting hand with the same card ranks, you could split your hand and bet more money against the dealer with the same hand!
 * The game keeps going until you quit or your balance hits $0. Your wins, losses, pushes, and overall win statistics are tracked.
 
 #### Function Descriptions
 
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
-* `CoinToss(wallet=None)`
+* `hand_value(hand)`: Returns the card values associated with each card rank
+* `display_table(dealer_hand, hands, active_index=None, reveal_dealer=False)`: Displays the table for both the dealer and the player. The dealer will have their second card hidden until it is their turn to play
+* `get_bet()`: Returns the bet amount that the player inputs
+* `can_split(hand, hands)`: Returns a boolean conditioned on whether a player has all the requirements to split a hand or not
+* `split_hand(hands, index, deck)`: Splits a hand by mutating their current hand array
+* `check_for_blackjack(dealer_hand, hands)`: Checks both the dealer and player for blackjack to resolve game status early
+* `play_player_hands(dealer_hand, hands, deck)`: Plays the player turn in blackjack, asking for inputs for their decisions
+* `play_dealer_hand(dealer_hand, hands, deck)`: Plays the dealer turn in blackjack after the player turn
+* `settle_all_hands(dealer_hand, hands)`: Settles all the player hands after both the player and dealer have finished playing their hands
+* `play_round()`: Creates a hand for both the dealer and player, and starts the game
+* `show_stats()`: Prints the wins, losses, pushes, and winrate for the game
+* `play()`: Main menu loop
 
 #### Usage
 
@@ -103,7 +105,29 @@ game.play()
 #### Example Output
 
 ```text
+--- BLACKJACK ---
+1. Play
+2. View Stats
+3. Quit
+Select an option: 1
+Current Balance: $100. Enter your bet: $50
 
+--- Dealer ---
+Q of Spades
+6 of Spades
+Dealer Value: 16
+
+--- Player Hand 1 ---
+8 of Diamonds
+2 of Clubs
+3 of Clubs
+10 of Hearts
+Player Value: 23
+Bet: $50
+Status: Bust
+
+Player Hand 1 (23):
+Bust! You lose.
 ```
 
 ### Coin Toss
