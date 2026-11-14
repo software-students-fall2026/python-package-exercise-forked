@@ -14,7 +14,7 @@ def test_init_default_wallet():
     war = War()
     assert war.wallet.balance == 100
     assert war.hand_size == 10
-    assert war.max_battles == 20
+    assert war.max_battles == 10
     assert len(war.player_hand) == 0
     assert len(war.dealer_hand) == 0
 
